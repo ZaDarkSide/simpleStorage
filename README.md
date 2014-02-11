@@ -1,14 +1,14 @@
 # simpleStorage
 
-*simpleStorage* is a fork of [jStorage](http://www.jstorage.org/) that only includes the minimal set of features. 
+*simpleStorage* is a fork of [jStorage](http://www.jstorage.org/) that only includes the minimal set of features. Basically it is a wrapper for native `JSON` + `localStorage` with some TTL magick mixed in.
 
-*simpleStorage* supports all modern browsers (including mobile). Older Internet Explorer versions are not supported.
+The module has no dependencies, you can use it as a standalone script (introduces `simpleStorage` global) or as an AMD module. All modern browsers (including mobile) are supported, older browsers (IE7, Firefox 3) are not.
 
-*simpleStorage* does not have any dependencies, you can use it as a standalone script (introduces `simpleStorage` global) or as an AMD module (adds no globals).
-
-*simpleStorage* is *very small* - about 1kB in size when minimized and gzipped
+*simpleStorage* is **very** small - about **1kB** in size when minimized and gzipped.
 
 ## Usage
+
+*simpleStorage* API is a subset of jStorage with slight modifications, so for most cases it should work out of the box if you are converting from jStorage. Main difference is between return values - if an action failed because of an error (storage full, storage not available, invalid data used etc.), you get the error object as the return value. jStorage never indicated anything if an error occurred.
 
 ### set(key, value[, options])
 
@@ -27,7 +27,7 @@ Where
 Return values
 
   * **true** - value was stored
-  * **true** - value was not stored
+  * **false** - value was not stored
   * Error object - value was stored because of an error
 
 ### get(key)
@@ -55,7 +55,7 @@ simpleStorage.deleteKey(key)
 Return values
 
   * **true** - value was deleted
-  * **true** - value was not found
+  * **false** - value was not found
   * Error object - value was not deleted because of an error
 
 ### setTTL(key, ttl)
@@ -74,12 +74,12 @@ Where
 Return values
 
   * **true** - ttl was set
-  * **true** - value was not found
+  * **false** - value was not found
   * Error object - ttl was not set because of an error
 
 ### getTTL(key)
 
-Retrieve remaining milliseconds for a key
+Retrieve remaining milliseconds for a key with TTL
 
 ```javascript
 ttl = simpleStorage.getTTL(key)
@@ -112,14 +112,14 @@ Retrieve all used keys as an array
 list = simpleStorage.index()
 ```
 
-Returns an array.
+Returns an array of keys.
 
 ### storageSize()
 
 Get used storage in symbol count
 
 ```javascript
-size = simpleStorage.storageSize()
+simpleStorage.storageSize()
 ```
 
 ### storageAvailable()
@@ -127,7 +127,7 @@ size = simpleStorage.storageSize()
 Check if local storage can be used
 
 ```javascript
-canUse = simpleStorage.storageAvailable()
+simpleStorage.storageAvailable()
 ```
 
 Returns true if storage is available
