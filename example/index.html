@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>simpleStorage - simple JavaScript plugin to store data locally</title>
+        
+        <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.1.0/css/bootstrap.min.css">
+        
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+          <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+          <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+
+        <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+        <script src="https://netdna.bootstrapcdn.com/bootstrap/3.1.0/js/bootstrap.min.js"></script>
+
+        <script src="../simpleStorage.js"></script>
+
+        <script>
+            var list = {
+                keys: [],
+                value: {}
+            };
+
+            function removeRow(elm){
+                var key = elm.element.key;
+                simpleStorage.deleteKey(key);
+                // remove old
+                for(var i = list.keys.length - 1; i>=0; i--){
+                    if(list.keys[i] == key){
+                        list.value[list.keys[i]].row.parentNode.removeChild(list.value[list.keys[i]].row);
+                        delete list.value[list.keys[i]]
+                        list.keys.splice(i, 1);
+                    }
+                }
+            }
+
+            function add(data){
+                var row = document.createElement("div"),
+                    name = document.createElement("div"),
+                    value = document.createElement("div"),
+                    ttl = document.createElement("div"),
+                    rem = document.createElement("div");
+                row.className = "row";
+
+                name.className = "col-md-1 name";
+                value.className = "col-md-8 value";
+                ttl.className = "col-md-1 ttl";
+                rem.className = "col-md-1 rem";
+
+                row.appendChild(name);
+                row.appendChild(value);
+                row.appendChild(ttl);
+                row.appendChild(rem);
+
+                name.innerHTML = "<pre>" + (data.key || "").toString().replace(/</g, "&lt;").replace(/</g, "&gt;") + "</pre>";
+
+                value.innerHTML = "<pre>" + (data.value || "").toString().replace(/</g, "&lt;").replace(/</g, "&gt;") + "</pre>";
+
+                ttl.innerHTML = "<pre class=\"ttl-val\">" + (Number(data.ttl) || 0) + "</pre>";
+
+                rem.innerHTML = '<button type="button" class="btn btn-default" onclick="removeRow(this.parentNode)"><span class="glyphicon glyphicon-remove"></span> Remove</button>';
+                rem.element = data;
+
+                document.getElementById("list").appendChild(row);
+
+                data.row = row;
+                list.value[data.key] = data;
+                list.keys.push(data.key);
+            }
+
+        	function update(){
+        		var keys = simpleStorage.index(), i, len, remove = [], ttl, exists;
+
+                for(i=0, len = keys.length; i<len; i++){
+                    if(!list.value.hasOwnProperty(keys[i])){
+                        // add new
+                        add({
+                            key: keys[i],
+                            value: JSON.stringify(simpleStorage.get(keys[i]), false, 4),
+                            ttl: Math.round(simpleStorage.getTTL(keys[i]) / 1000)    
+                        });
+                    }else{
+                        ttl = Math.round(simpleStorage.getTTL(keys[i]) / 1000);
+                        if(list.value[keys[i]].ttl != ttl){
+                            // Update
+                            list.value[keys[i]].ttl = ttl;
+                            list.value[keys[i]].row.querySelector(".ttl-val").innerHTML = ttl;
+                        }
+                    }
+        		}
+
+                // remove old
+                for(i = list.keys.length - 1; i>=0; i--){
+                    exists = false;
+                    for(var j=0, jlen = keys.length; j < jlen; j++){
+                        if(list.keys[i] == keys[j]){
+                            exists = true;
+                            break;
+                        }
+                    }
+                    if(!exists){
+                        list.value[list.keys[i]].row.parentNode.removeChild(list.value[list.keys[i]].row);
+                        delete list.value[list.keys[i]]
+                        list.keys.splice(i, 1);
+                    }
+                }
+        	}
+
+            function set(){
+                var keyElm = document.getElementById("set-key"),
+                    valueElm = document.getElementById("set-value"),
+                    ttlElm = document.getElementById("set-ttl"),
+                    key = keyElm.value,
+                    value = valueElm.value,
+                    ttl = Number(ttlElm.value) || 0;
+
+                if(!key){
+                    alert("Key not set");
+                    return;
+                }
+
+                simpleStorage.set(key, value, {TTL: ttl * 1000});
+                if(list.value.hasOwnProperty(key)){
+                    list.value[key].value = JSON.stringify(value, false, 4);
+                    list.value[key].ttl = ttl;
+
+                    list.value[key].row.querySelector(".value").innerHTML = "<pre>" + (value || "").toString().replace(/</g, "&lt;").replace(/</g, "&gt;") + "</pre>";
+
+                    list.value[key].row.querySelector(".ttl-val").innerHTML = ttl;
+                }else{
+                    update();
+                }
+            }
+
+        	setInterval(update, 1000);
+        </script>
+    </head>
+    <body>
+
+<a href="https://github.com/you"><img style="position: absolute; top: 0; left: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_left_red_aa0000.png" alt="Fork me on GitHub"></a>
+
+    	<div class="container">
+
+	      	<div class="page-header">
+
+    			<h1>simpleStorage</h1>
+                <p class="lead">Stored data should remain after browser refresh. Uses localStorage + JSON.</p>
+
+            </div>
+
+            <div class="row">
+                <div class="col-md-1">
+                    <h4>Key</h4>
+                </div>
+                <div class="col-md-8">
+                    <h4>Value</h4>
+                </div>
+                <div class="col-md-1">
+                    <h4>TTL s.</h4>
+                </div>
+            </div>
+
+            <div id="list">
+            </div>
+
+            <div class="row">
+                <div class="col-md-1">
+                    <div class="form-group">
+                        <input type="text" id="set-key" class="form-control" placeholder="Key">
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    <div class="form-group">
+                        <input type="text" id="set-value" class="form-control" placeholder="Value">
+                    </div>
+                </div>
+                <div class="col-md-1">
+                    <div class="form-group">
+                        <input type="text" id="set-ttl" class="form-control" placeholder="0">
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <button type="button" class="btn btn-primary" onclick="set()"><span class="glyphicon glyphicon-plus"></span> Add value</button>
+                </div>
+                
+            </div>
+
+            <div class="row">
+                <div class="col-md-10">
+                </div>
+                <div class="col-md-2">
+                    <button type="button" class="btn btn-danger" onclick="alert(simpleStorage.flush() === true ? 'Flushed!' : 'Flush failed');"><span class="glyphicon glyphicon-remove"></span> Flush values</button>
+                </div>
+                
+            </div>
+
+            <blockquote>Setting TTL to 0 clears timeout. Actual used values are milliseconds but this demo page uses full seconds.</blockquote>
+
+		</div>
+
+        <script>
+            update();
+        </script>
+    </body>
+</html>
