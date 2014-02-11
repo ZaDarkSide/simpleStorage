@@ -1,10 +1,12 @@
 # simpleStorage
 
-This is a fork of [jStorage](http://www.jstorage.org/) that only includes the minimal set of features. Older Internet Explorer versions are not supported.
+*simpleStorage* is a fork of [jStorage](http://www.jstorage.org/) that only includes the minimal set of features. 
 
-simpleStorage does not have any dependencies, you can use it as a standalone script (introduces `simpleStorage`) global or as an AMD module (adds no globals).
+*simpleStorage* supports all modern browsers (including mobile). Older Internet Explorer versions are not supported.
 
-simpleStorage is about 1kB in size when minimized and gzipped
+*simpleStorage* does not have any dependencies, you can use it as a standalone script (introduces `simpleStorage` global) or as an AMD module (adds no globals).
+
+*simpleStorage* is *very small* - about 1kB in size when minimized and gzipped
 
 ## Usage
 
