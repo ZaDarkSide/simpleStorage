@@ -16,19 +16,19 @@ QUnit.testDone(function() {
 
 module("general");
 
-test( "can use", function() {
+test("can use", function() {
     "use strict";
 
     ok(simpleStorage.canUse());
 });
 
-test( "can not use", function() {
+test("can not use", function() {
     "use strict";
 
     ok(simpleStorage.canUse());
 });
 
-test( "flush/index", function() {
+test("flush/index", function() {
     "use strict";
 
     equal(simpleStorage.set("test", "value"), true);
@@ -38,7 +38,7 @@ test( "flush/index", function() {
     ok(!simpleStorage.get("test"));
 });
 
-module( "keys" );
+module("keys");
 
 test("missing", function() {
     "use strict";

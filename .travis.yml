@@ -1,0 +1,15 @@
+install:
+  - wget https://raw2.github.com/jonkemp/qunit-phantomjs-runner/master/runner.js
+
+before_script:
+  - python -m SimpleHTTPServer 8888 &
+  - sleep 3
+
+script: phantomjs runner.js http://localhost:8888/tests/
+
+notifications:
+  email:
+    recipients:
+      - andris@kreata.ee
+    on_success: change
+    on_failure: change
