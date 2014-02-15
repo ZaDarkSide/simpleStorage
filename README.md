@@ -8,6 +8,8 @@ The module has no dependencies, you can use it as a standalone script (introduce
 
 *simpleStorage* is **very** small - about **1kB** in size when minimized and gzipped.
 
+[![Build Status](https://travis-ci.org/andris9/simpleStorage.png?branch=master)](https://travis-ci.org/andris9/simpleStorage)
+
 ## Install
 
 Download [simpleStorage.js](https://github.com/andris9/simpleStorage/blob/master/simpleStorage.js) or install with bower:
