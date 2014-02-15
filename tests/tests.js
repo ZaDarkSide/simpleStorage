@@ -135,11 +135,14 @@ asyncTest("setTTL, negative value", function() {
 asyncTest("getTTL", function() {
     "use strict";
 
-    expect(3);
-    equal(simpleStorage.set("ttlkey", "value", {TTL: 500}), true);
+    expect(6);
+    equal(simpleStorage.set("ttlkey", "value"), true);
+    equal(simpleStorage.getTTL("ttlkey"), Infinity);
+    equal(simpleStorage.setTTL("ttlkey", 500), true);
     setTimeout(function(){
         ok(simpleStorage.getTTL("ttlkey") > 0);
         setTimeout(function(){
+            equal(simpleStorage.getTTL("ttlkey"), false);
             ok(typeof simpleStorage.get("ttlkey") == "undefined");
             start();
       }, 500);

@@ -295,7 +295,8 @@
             }
 
             if(_storage.hasOwnProperty(key) && key != "__simpleStorage_meta"){
-                if(this.getTTL(key) >= 0){
+                // TTL value for an existing key is either a positive number or an Infinity
+                if(this.getTTL(key)){
                     return _storage[key];
                 }
             }
@@ -329,20 +330,27 @@
         },
 
         getTTL: function(key){
+            var ttl;
+
             if(!_storage){
                 return false;
             }
 
-            if(_storage.hasOwnProperty(key) &&
-                _storage.__simpleStorage_meta &&
-                _storage.__simpleStorage_meta.TTL &&
-                _storage.__simpleStorage_meta.TTL.expire &&
-                _storage.__simpleStorage_meta.TTL.expire.hasOwnProperty(key)){
+            if(_storage.hasOwnProperty(key)){
+                if(_storage.__simpleStorage_meta &&
+                    _storage.__simpleStorage_meta.TTL &&
+                    _storage.__simpleStorage_meta.TTL.expire &&
+                    _storage.__simpleStorage_meta.TTL.expire.hasOwnProperty(key)){
 
-                return _storage.__simpleStorage_meta.TTL.expire[key] - (+new Date()) || 0;
+                    ttl = Math.max(_storage.__simpleStorage_meta.TTL.expire[key] - (+new Date()) || 0, 0);
+
+                    return ttl || false;
+                }else{
+                    return Infinity;
+                }
             }
 
-            return 0;
+            return false;
         },
 
         flush: function(){

@@ -5,9 +5,9 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>simpleStorage - simple JavaScript plugin to store data locally</title>
-        
+
         <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.1.0/css/bootstrap.min.css">
-        
+
         <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
         <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
         <!--[if lt IE 9]>
@@ -61,7 +61,7 @@
 
                 value.innerHTML = "<pre>" + (data.value || "").toString().replace(/</g, "&lt;").replace(/</g, "&gt;") + "</pre>";
 
-                ttl.innerHTML = "<pre class=\"ttl-val\">" + (Number(data.ttl) || 0) + "</pre>";
+                ttl.innerHTML = "<pre class=\"ttl-val\">" + (Number(data.ttl) != Infinity && Number(data.ttl) || "–") + "</pre>";
 
                 rem.innerHTML = '<button type="button" class="btn btn-default" onclick="removeRow(this.parentNode)"><span class="glyphicon glyphicon-remove"></span> Remove</button>';
                 rem.element = data;
@@ -73,8 +73,8 @@
                 list.keys.push(data.key);
             }
 
-        	function update(){
-        		var keys = simpleStorage.index(), i, len, remove = [], ttl, exists;
+            function update(){
+                var keys = simpleStorage.index(), i, len, remove = [], ttl, exists;
 
                 for(i=0, len = keys.length; i<len; i++){
                     if(!list.value.hasOwnProperty(keys[i])){
@@ -82,17 +82,17 @@
                         add({
                             key: keys[i],
                             value: JSON.stringify(simpleStorage.get(keys[i]), false, 4),
-                            ttl: Math.round(simpleStorage.getTTL(keys[i]) / 1000)    
+                            ttl: Math.round(simpleStorage.getTTL(keys[i]) / 1000)
                         });
                     }else{
                         ttl = Math.round(simpleStorage.getTTL(keys[i]) / 1000);
                         if(list.value[keys[i]].ttl != ttl){
                             // Update
                             list.value[keys[i]].ttl = ttl;
-                            list.value[keys[i]].row.querySelector(".ttl-val").innerHTML = ttl;
+                            list.value[keys[i]].row.querySelector(".ttl-val").innerHTML = ttl != Infinity && ttl || "–";
                         }
                     }
-        		}
+                }
 
                 // remove old
                 for(i = list.keys.length - 1; i>=0; i--){
@@ -109,7 +109,7 @@
                         list.keys.splice(i, 1);
                     }
                 }
-        	}
+            }
 
             function set(){
                 var keyElm = document.getElementById("set-key"),
@@ -129,26 +129,26 @@
                     list.value[key].value = JSON.stringify(value, false, 4);
                     list.value[key].ttl = ttl;
 
-                    list.value[key].row.querySelector(".value").innerHTML = "<pre>" + (value || "").toString().replace(/</g, "&lt;").replace(/</g, "&gt;") + "</pre>";
+                    list.value[key].row.querySelector(".value").innerHTML = "<pre>" + (list.value[key].value || "").toString().replace(/</g, "&lt;").replace(/</g, "&gt;") + "</pre>";
 
-                    list.value[key].row.querySelector(".ttl-val").innerHTML = ttl;
+                    list.value[key].row.querySelector(".ttl-val").innerHTML = ttl != "Infinity" && ttl || "–";
                 }else{
                     update();
                 }
             }
 
-        	setInterval(update, 1000);
+            setInterval(update, 1000);
         </script>
     </head>
     <body>
 
-<a href="https://github.com/you"><img style="position: absolute; top: 0; left: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_left_red_aa0000.png" alt="Fork me on GitHub"></a>
+        <a href="https://github.com/you"><img style="position: absolute; top: 0; left: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_left_red_aa0000.png" alt="Fork me on GitHub"></a>
 
-    	<div class="container">
+        <div class="container">
 
-	      	<div class="page-header">
+              <div class="page-header">
 
-    			<h1>simpleStorage</h1>
+                <h1>simpleStorage</h1>
                 <p class="lead">Stored data should remain after browser refresh. Uses localStorage + JSON.</p>
 
             </div>
@@ -187,7 +187,7 @@
                 <div class="col-md-2">
                     <button type="button" class="btn btn-primary" onclick="set()"><span class="glyphicon glyphicon-plus"></span> Add value</button>
                 </div>
-                
+
             </div>
 
             <div class="row">
@@ -196,12 +196,12 @@
                 <div class="col-md-2">
                     <button type="button" class="btn btn-danger" onclick="alert(simpleStorage.flush() === true ? 'Flushed!' : 'Flush failed');"><span class="glyphicon glyphicon-remove"></span> Flush values</button>
                 </div>
-                
+
             </div>
 
             <blockquote>Setting TTL to 0 clears timeout. Actual used values are milliseconds but this demo page uses full seconds.</blockquote>
 
-		</div>
+        </div>
 
         <script>
             update();

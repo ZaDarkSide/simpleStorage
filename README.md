@@ -28,7 +28,7 @@ Return values
 
   * **true** - value was stored
   * **false** - value was not stored
-  * Error object - value was stored because of an error
+  * Error object - value was not stored because of an error
 
 ### get(key)
 
@@ -89,7 +89,11 @@ Where
 
   * **key** - the key to be checked
 
-Returns remaining milliseconds or 0 if TTL was not set (or key was not found)
+Return values
+
+  * finite **number** - remaining milliseconds
+  * **Infinity** - TTL is not set for the selected key
+  * **false** - selected key does not exist or is expired
 
 ### flush()
 
