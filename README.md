@@ -1,10 +1,20 @@
 # simpleStorage
 
-*simpleStorage* is a fork of [jStorage](http://www.jstorage.org/) that only includes the minimal set of features. Basically it is a wrapper for native `JSON` + `localStorage` with some TTL magick mixed in.
+Cross-browser key-value store database to store data locally in the browser.
+
+*simpleStorage* is a fork of [jStorage](http://www.jstorage.org/) that only includes the minimal set of features. Basically it is a wrapper for native `JSON` + `localStorage` with some TTL magic mixed in.
 
 The module has no dependencies, you can use it as a standalone script (introduces `simpleStorage` global) or as an AMD module. All modern browsers (including mobile) are supported, older browsers (IE7, Firefox 3) are not.
 
 *simpleStorage* is **very** small - about **1kB** in size when minimized and gzipped.
+
+## Install
+
+Download [simpleStorage.js](https://github.com/andris9/simpleStorage/blob/master/simpleStorage.js) or install with bower:
+
+    bower install simpleStorage
+
+and include the following script in your web application: *bower_components/simpleStorage/simpleStorage.js*
 
 ## Usage
 
