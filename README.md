@@ -16,6 +16,12 @@ Download [simpleStorage.js](https://github.com/andris9/simpleStorage/blob/master
 
 and include the following script in your web application: *bower_components/simpleStorage/simpleStorage.js*
 
+## Support simpleStorage development
+
+[![Donate to author](https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=DB26KWR2BQX5W)
+
+If you want to support with Bitcoins, then my wallet address is `15Z8ADxhssKUiwP3jbbqJwA21744KMCfTM`
+
 ## Usage
 
 *simpleStorage* API is a subset of jStorage with slight modifications, so for most cases it should work out of the box if you are converting from jStorage. Main difference is between return values - if an action failed because of an error (storage full, storage not available, invalid data used etc.), you get the error object as the return value. jStorage never indicated anything if an error occurred.
