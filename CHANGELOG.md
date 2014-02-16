@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.1.2 2014-02-16
+
+  * Bumped version to 0.1.2
+  * Refactored TTL cleanup [1e176925]
+  * Added travis-ci config for auto running tests after every commit [845df28a]
+
 ## v0.1.1 2014-02-15
 
   * Bumped version to 0.1.1

@@ -17,7 +17,7 @@
     "use strict";
 
     var
-        VERSION = "0.1.1",
+        VERSION = "0.1.2",
 
         /* This is the object, that holds the cached values */
         _storage = false,
