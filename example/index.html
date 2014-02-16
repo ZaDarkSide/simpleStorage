@@ -47,8 +47,8 @@
                     rem = document.createElement("div");
                 row.className = "row";
 
-                name.className = "col-md-1 name";
-                value.className = "col-md-8 value";
+                name.className = "col-md-2 name";
+                value.className = "col-md-6 value";
                 ttl.className = "col-md-1 ttl";
                 rem.className = "col-md-1 rem";
 
@@ -119,6 +119,10 @@
                     value = valueElm.value,
                     ttl = Number(ttlElm.value) || 0;
 
+                try{
+                    value = JSON.parse(value);
+                }catch(E){}
+
                 if(!key){
                     alert("Key not set");
                     return;
@@ -135,6 +139,10 @@
                 }else{
                     update();
                 }
+
+                keyElm.value = "";
+                valueElm.value = "";
+                ttlElm.value = "";
             }
 
             setInterval(update, 1000);
@@ -154,10 +162,10 @@
             </div>
 
             <div class="row">
-                <div class="col-md-1">
+                <div class="col-md-2">
                     <h4>Key</h4>
                 </div>
-                <div class="col-md-8">
+                <div class="col-md-6">
                     <h4>Value</h4>
                 </div>
                 <div class="col-md-1">
@@ -169,14 +177,14 @@
             </div>
 
             <div class="row">
-                <div class="col-md-1">
+                <div class="col-md-2">
                     <div class="form-group">
                         <input type="text" id="set-key" class="form-control" placeholder="Key">
                     </div>
                 </div>
-                <div class="col-md-8">
+                <div class="col-md-6">
                     <div class="form-group">
-                        <input type="text" id="set-value" class="form-control" placeholder="Value">
+                        <input type="text" id="set-value" class="form-control" placeholder="Value (string or JSON)">
                     </div>
                 </div>
                 <div class="col-md-1">
@@ -185,13 +193,13 @@
                     </div>
                 </div>
                 <div class="col-md-2">
-                    <button type="button" class="btn btn-primary" onclick="set()"><span class="glyphicon glyphicon-plus"></span> Add value</button>
+                    <button type="button" class="btn btn-primary" onclick="set()"><span class="glyphicon glyphicon-plus"></span> Add or update</button>
                 </div>
 
             </div>
 
             <div class="row">
-                <div class="col-md-10">
+                <div class="col-md-9">
                 </div>
                 <div class="col-md-2">
                     <button type="button" class="btn btn-danger" onclick="alert(simpleStorage.flush() === true ? 'Flushed!' : 'Flush failed');"><span class="glyphicon glyphicon-remove"></span> Flush values</button>
@@ -199,7 +207,8 @@
 
             </div>
 
-            <blockquote>Setting TTL to 0 clears timeout. Actual used values are milliseconds but this demo page uses full seconds.</blockquote>
+            <blockquote>Setting TTL to 0 clears timeout. Actual used values are milliseconds but this demo page uses full seconds.<br />
+                Value can be a string or valid JSON</blockquote>
 
         </div>
 
