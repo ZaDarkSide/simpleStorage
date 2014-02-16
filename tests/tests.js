@@ -1,5 +1,5 @@
 /* jshint browser: true */
-/* global QUnit: false, simpleStorage: false, asyncTest: false, expect: false, 
+/* global QUnit: false, simpleStorage: false, asyncTest: false, expect: false,
    start: false, test: false, ok: false, deepEqual: false, equal: false */
 
 QUnit.testStart(function() {
@@ -147,4 +147,17 @@ asyncTest("getTTL", function() {
             start();
       }, 500);
     }, 250);
+});
+
+asyncTest("Clearing TTL removes meta object", function() {
+    "use strict";
+
+    expect(4);
+    ok(!localStorage.simpleStorage);
+    equal(simpleStorage.set("ttlkey", "value", {TTL: 100}), true);
+    ok(JSON.parse(localStorage.simpleStorage).__simpleStorage_meta);
+    setTimeout(function(){
+        ok(!JSON.parse(localStorage.simpleStorage).__simpleStorage_meta);
+        start();
+    }, 200);
 });

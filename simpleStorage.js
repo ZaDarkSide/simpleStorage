@@ -106,7 +106,7 @@
     }
 
     function _handleTTL(){
-        var curtime, i, len, expire, keys, nextExpire = Infinity, count = 0;
+        var curtime, i, len, expire, keys, nextExpire = Infinity, expiredKeysCount = 0;
 
         clearTimeout(_ttl_timeout);
 
@@ -120,7 +120,7 @@
 
         for(i = 0, len = keys.length; i<len; i++){
             if(expire[keys[i]] <= curtime){
-                count++;
+                expiredKeysCount++;
                 delete _storage[keys[i]];
                 delete expire[keys[i]];
             }else{
@@ -137,31 +137,16 @@
         }
 
         // remove expired from TTL list and save changes
-        if(count){
-            keys.splice(0, count);
+        if(expiredKeysCount){
+            keys.splice(0, expiredKeysCount);
 
-            // If nothing to TTL, remove the object
-            if(!_storage.__simpleStorage_meta.TTL.length){
-                delete _storage.__simpleStorage_meta.TTL;
-                count = 0;
-
-                // If meta object is empty, remove it
-                for(i in _storage.__simpleStorage_meta){
-                    if(_storage.__simpleStorage_meta.hasOwnProperty(i)){
-                        count++;
-                        break;
-                    }
-                }
-                if(!count){
-                    delete _storage.__simpleStorage_meta;
-                }
-            }
+            _cleanMetaObject();
             _save();
         }
     }
 
     function _setTTL(key, ttl){
-        var curtime = +new Date(), i, len, added = false, count;
+        var curtime = +new Date(), i, len, added = false;
 
         ttl = Number(ttl) || 0;
 
@@ -216,23 +201,7 @@
                     }
                 }
 
-                // If nothing to TTL, remove the object
-                if(!_storage.__simpleStorage_meta.TTL.keys.length){
-                    delete _storage.__simpleStorage_meta.TTL;
-                    count = 0;
-
-                    // If meta object is empty, remove it
-                    for(i in _storage.__simpleStorage_meta){
-                        if(_storage.__simpleStorage_meta.hasOwnProperty(i)){
-                            count++;
-                            break;
-                        }
-                    }
-
-                    if(!count){
-                        delete _storage.__simpleStorage_meta;
-                    }
-                }
+                _cleanMetaObject();
             }
         }
 
@@ -243,6 +212,35 @@
         }
 
         return true;
+    }
+
+    function _cleanMetaObject(){
+        var updated = false, hasProperties = false, i;
+
+        if(!_storage || !_storage.__simpleStorage_meta){
+            return updated;
+        }
+
+        // If nothing to TTL, remove the object
+        if(_storage.__simpleStorage_meta.TTL && !_storage.__simpleStorage_meta.TTL.keys.length){
+            delete _storage.__simpleStorage_meta.TTL;
+            updated = true;
+        }
+
+        // If meta object is empty, remove it
+        for(i in _storage.__simpleStorage_meta){
+            if(_storage.__simpleStorage_meta.hasOwnProperty(i)){
+                hasProperties = true;
+                break;
+            }
+        }
+
+        if(!hasProperties){
+            delete _storage.__simpleStorage_meta;
+            updated = true;
+        }
+
+        return updated;
     }
 
     ////////////////////////// PUBLIC INTERFACE /////////////////////////
