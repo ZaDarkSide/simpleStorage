@@ -1,8 +1,8 @@
 install:
-  - wget https://raw2.github.com/jonkemp/qunit-phantomjs-runner/master/runner.js
+  - wget https://raw2.github.com/andris9/qunit-phantomjs-runner/master/runner.js
 
 before_script:
-  - python -m SimpleHTTPServer 8888 &
+  - python -m SimpleHTTPServer 8888 2> /dev/null &
   - sleep 3
 
 script: phantomjs runner.js http://localhost:8888/tests/
