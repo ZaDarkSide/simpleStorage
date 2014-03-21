@@ -144,12 +144,12 @@ Get used storage in symbol count
 simpleStorage.storageSize()
 ```
 
-### storageAvailable()
+### canUse()
 
 Check if local storage can be used
 
 ```javascript
-simpleStorage.storageAvailable()
+simpleStorage.canUse()
 ```
 
 Returns true if storage is available
