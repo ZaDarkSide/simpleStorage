@@ -133,7 +133,7 @@
 
         // set next check
         if(nextExpire != Infinity){
-            _ttl_timeout = setTimeout(_handleTTL, nextExpire - curtime);
+            _ttl_timeout = setTimeout(_handleTTL, Math.min(nextExpire - curtime, 0x7FFFFFFF));
         }
 
         // remove expired from TTL list and save changes
@@ -208,7 +208,7 @@
         // schedule next TTL check
         clearTimeout(_ttl_timeout);
         if(_storage && _storage.__simpleStorage_meta && _storage.__simpleStorage_meta.TTL && _storage.__simpleStorage_meta.TTL.keys.length){
-            _ttl_timeout = setTimeout(_handleTTL, Math.max(_storage.__simpleStorage_meta.TTL.expire[_storage.__simpleStorage_meta.TTL.keys[0]] - curtime, 0));
+            _ttl_timeout = setTimeout(_handleTTL, Math.min(Math.max(_storage.__simpleStorage_meta.TTL.expire[_storage.__simpleStorage_meta.TTL.keys[0]] - curtime, 0), 0x7FFFFFFF));
         }
 
         return true;
