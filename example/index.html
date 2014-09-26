@@ -81,7 +81,7 @@
                         // add new
                         add({
                             key: keys[i],
-                            value: JSON.stringify(simpleStorage.get(keys[i]), false, 4),
+                            value: JSON.stringify(simpleStorage.get(keys[i]), undefined, 4),
                             ttl: Math.round(simpleStorage.getTTL(keys[i]) / 1000)
                         });
                     }else{
@@ -130,7 +130,7 @@
 
                 simpleStorage.set(key, value, {TTL: ttl * 1000});
                 if(list.value.hasOwnProperty(key)){
-                    list.value[key].value = JSON.stringify(value, false, 4);
+                    list.value[key].value = JSON.stringify(value, undefined, 4);
                     list.value[key].ttl = ttl;
 
                     list.value[key].row.querySelector(".value").innerHTML = "<pre>" + (list.value[key].value || "").toString().replace(/</g, "&lt;").replace(/</g, "&gt;") + "</pre>";

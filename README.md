@@ -158,6 +158,10 @@ Returns true if storage is available
 
 See demo [here](http://tahvel.info/simpleStorage/example/).
 
+## Tests
+
+See QUnit tests [here](http://tahvel.info/simpleStorage/tests/).
+
 ## License
 
 [Unlicense](http://unlicense.org/)
