@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.1.3 2015-01-15
+
+  * Bumped version to 0.1.3
+  * Changed formatting [68d600b4]
+  * #18 fix duplicate keys (will-e-yams) [28a1bd2b]
+
 ## v0.1.2 2014-02-16
 
   * Bumped version to 0.1.2
