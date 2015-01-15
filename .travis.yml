@@ -1,5 +1,5 @@
 install:
-  - wget git pull https://github.com/will-e-yams/simpleStorage.git master 
+  - wget https://raw.githubusercontent.com/andris9/qunit-phantomjs-runner/master/runner.js
 
 before_script:
   - python -m SimpleHTTPServer 8888 2> /dev/null &
