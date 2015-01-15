@@ -170,7 +170,7 @@
 
                 _storage.__simpleStorage_meta.TTL.expire[key] = curtime + ttl;
 
-                // remove from keys array
+                // find the expiring key in the array and remove it and all before it (because of sort)
                 if(_storage.__simpleStorage_meta.TTL.expire.hasOwnProperty(key)){
                     for(i = 0, len = _storage.__simpleStorage_meta.TTL.keys.length; i<len; i++){
                         if(_storage.__simpleStorage_meta.TTL.keys[i] == key){
@@ -179,13 +179,16 @@
                     }
                 }
 
-                // add to keys array, sorted by ttl
-                for(i = 0, len = _storage.__simpleStorage_meta.TTL.keys.length; i<len; i++){
-                    if(_storage.__simpleStorage_meta.TTL.expire[_storage.__simpleStorage_meta.TTL.keys[i]] > curtime + ttl){
-                        _storage.__simpleStorage_meta.TTL.keys.splice(i, 0, key);
-                    }
-                }
+				// add key to keys array preserving sort (soonest first)
+				for (i = 0, len = _storage.__simpleStorage_meta.TTL.keys.length; i < len; i++) {
+					if (_storage.__simpleStorage_meta.TTL.expire[_storage.__simpleStorage_meta.TTL.keys[i]] > (curtime + ttl)) {
+						_storage.__simpleStorage_meta.TTL.keys.splice(i, 0, key);
+						added = true;
+						break;
+					}
+				}
 
+				// if not added in previous loop, add here
                 if(!added){
                     _storage.__simpleStorage_meta.TTL.keys.push(key);
                 }
