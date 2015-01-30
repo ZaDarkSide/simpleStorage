@@ -98,7 +98,6 @@
 			}
 
 			if (source && sourceMeta) {
-				console.log('loading simpleStorage metadata', sourceMeta)
 				_storage_meta = JSON.parse(sourceMeta);
 			} else {
 				// init meta
@@ -197,7 +196,6 @@
 
 				if (!added) {
 					_storage_meta.TTL.expireOrder.push(key);
-					console.log('new key pushed', key, _storage_meta.TTL.expireOrder)
 				}
 			} else {
 				return false;
