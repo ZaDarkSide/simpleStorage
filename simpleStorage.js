@@ -2,25 +2,27 @@
 /* global define: false */
 
 // AMD shim
-(function(root, factory) {
+(function (root, factory) {
 
-    "use strict";
+	"use strict";
 
-    if (typeof define === 'function' && define.amd) {
-        define(factory);
-    } else {
-        root.simpleStorage = factory();
-    }
+	if (typeof define === 'function' && define.amd) {
+		define(factory);
+	} else {
+		root.simpleStorage = factory();
+	}
 
-}(this, function() {
+}(this, function () {
 
-    "use strict";
+	"use strict";
 
-    var
-        VERSION = "0.1.2",
+	var
+        VERSION = "0.2.0",
 
         /* This is the object, that holds the cached values */
         _storage = false,
+        /* This is the object that holds the TTL values */
+        _storage_meta = false,
 
         /* How much space does the storage take */
         _storage_size = 0,
@@ -29,367 +31,352 @@
 
         _ttl_timeout = null;
 
-    // This method might throw as it touches localStorage and doing so
-    // can be prohibited in some environments
-    function _init(){
+	// This method might throw as it touches sessionStorage and doing so
+	// can be prohibited in some environments
+	function _init() {
 
-        // If localStorage does not exist, the following throws
-        // This is intentional
-        window.localStorage.setItem("__simpleStorageInitTest", "tmpval");
-        window.localStorage.removeItem("__simpleStorageInitTest");
+		// If sessionStorage does not exist, the following throws
+		// This is intentional
+		window.sessionStorage.setItem("__simpleStorageInitTest", "tmpval");
+		window.sessionStorage.removeItem("__simpleStorageInitTest");
 
-        // Load data from storage
-        _load_storage();
+		// Load data from storage
+		_load_storage();
 
-        // remove dead keys
-        _handleTTL();
+		// remove dead keys
+		_handleTTL();
 
-        // start listening for changes
-        _setupUpdateObserver();
+		// start listening for changes
+		_setupUpdateObserver();
 
-        // handle cached navigation
-        if("addEventListener" in window){
-            window.addEventListener("pageshow", function(event){
-                if(event.persisted){
-                    _reloadData();
-                }
-            }, false);
-        }
+		// handle cached navigation
+		if ("addEventListener" in window) {
+			window.addEventListener("pageshow", function (event) {
+				if (event.persisted) {
+					_reloadData();
+				}
+			}, false);
+		}
 
-        _storage_available = true;
-    }
+		_storage_available = true;
+	}
 
-    /**
+	/**
      * Sets up a storage change observer
      */
-    function _setupUpdateObserver(){
-        if("addEventListener" in window){
-            window.addEventListener("storage", _reloadData, false);
-        }else{
-            document.attachEvent("onstorage", _reloadData);
-        }
-    }
+	function _setupUpdateObserver() {
+		if ("addEventListener" in window) {
+			window.addEventListener("storage", _reloadData, false);
+		} else {
+			document.attachEvent("onstorage", _reloadData);
+		}
+	}
 
-    /**
+	/**
      * Reload data from storage when needed
      */
-    function _reloadData(){
-        try{
-            _load_storage();
-        }catch(E){
-            _storage_available = false;
-            return;
-        }
-        _handleTTL();
-    }
+	function _reloadData() {
+		try {
+			_load_storage();
+		} catch (E) {
+			_storage_available = false;
+			return;
+		}
+		_handleTTL();
+	}
 
-    function _load_storage(){
-        var source = localStorage.getItem("simpleStorage");
+	function _load_storage() {
+		var source = sessionStorage.simpleStorage;
+		var sourceMeta = sessionStorage.simpleStorageMeta;
 
-        try{
-            _storage = JSON.parse(source) || {};
-        }catch(E){
-            _storage = {};
-        }
+		try {
+			if (source) {
+				_storage = JSON.parse(source);
+			} else {
+				// init storage
+				_storage = {};
+			}
 
-        _storage_size = _get_storage_size();
-    }
+			if (source && sourceMeta) {
+				console.log('loading simpleStorage metadata', sourceMeta)
+				_storage_meta = JSON.parse(sourceMeta);
+			} else {
+				// init meta
+				_storage_meta = {};
+				_storage_meta.TTL = { expire: {}, expireOrder: [] };
+			}
 
-    function _save(){
-        try{
-            localStorage.setItem("simpleStorage", JSON.stringify(_storage));
-            _storage_size = _get_storage_size();
-        }catch(E){
-            return E;
-        }
-        return true;
-    }
+		} catch (E) {
+			_storage = {};
+		}
 
-    function _get_storage_size() {
-        var source = localStorage.getItem("simpleStorage");
-        return source ? String(source).length : 0;
-    }
+		_storage_size = _getStorageSize();
+	}
 
-    function _handleTTL(){
-        var curtime, i, len, expire, keys, nextExpire = Infinity, expiredKeysCount = 0;
+	function _save() {
+		try {
+			sessionStorage.simpleStorage = JSON.stringify(_storage);
+			sessionStorage.simpleStorageMeta = JSON.stringify(_storage_meta);
+			_storage_size = _getStorageSize();
+		} catch (E) {
+			return E;
+		}
+		return true;
+	}
 
-        clearTimeout(_ttl_timeout);
+	function _getStorageSize() {
+		return sessionStorage.simpleStorage ? String(sessionStorage.simpleStorage).length : 0
+			   + sessionStorage.simpleStorageMeta ? String(sessionStorage.simpleStorageMeta).length : 0;
+	}
 
-        if(!_storage || !_storage.__simpleStorage_meta || !_storage.__simpleStorage_meta.TTL){
-            return;
-        }
+	function _handleTTL() {
+		var curtime, i, len, expire, expireOrder, keysRemoved = [], nextExpire = Infinity;
 
-        curtime = +new Date();
-        keys = _storage.__simpleStorage_meta.TTL.keys || [];
-        expire = _storage.__simpleStorage_meta.TTL.expire || {};
+		clearTimeout(_ttl_timeout);
 
-        for(i = 0, len = keys.length; i<len; i++){
-            if(expire[keys[i]] <= curtime){
-                expiredKeysCount++;
-                delete _storage[keys[i]];
-                delete expire[keys[i]];
-            }else{
-                if(expire[keys[i]] < nextExpire){
-                    nextExpire = expire[keys[i]];
-                }
-                break;
-            }
-        }
+		if (!_storage || !_storage_meta) return;
 
-        // set next check
-        if(nextExpire != Infinity){
-            _ttl_timeout = setTimeout(_handleTTL, Math.min(nextExpire - curtime, 0x7FFFFFFF));
-        }
+		curtime = +new Date();
 
-        // remove expired from TTL list and save changes
-        if(expiredKeysCount){
-            keys.splice(0, expiredKeysCount);
+		for (i = 0; i < _storage_meta.TTL.expireOrder.length; i++) {
+			var key = _storage_meta.TTL.expireOrder[i];
+			var item = _storage[key];
+			if (_storage_meta.TTL.expire[key] <= curtime) {
+				delete _storage[key]; // remove actual data
+				delete _storage_meta.TTL.expire[key]; // remove expire timeout
+				_storage_meta.TTL.expireOrder.splice(0, 1); // remove expireOrder
+				_save();
+				keysRemoved.push(key) // defer to outside of for loop to avoid race conditions on array indexing
 
-            _cleanMetaObject();
-            _save();
-        }
-    }
+			} else {
+				if (_storage_meta.TTL.expire[key] < nextExpire)
+					nextExpire = _storage_meta.TTL.expire[key];
+				break; // short circuit
+			}
+		}
 
-    function _setTTL(key, ttl){
-        var curtime = +new Date(), i, len, added = false;
+		// dispatch simpleStorageItemRemoved events
+		for (var i = 0; i < keysRemoved.length; i++) 
+			_dispatchEvent('simpleStorageItemRemoved', { 'key': keysRemoved[i] })
 
-        ttl = Number(ttl) || 0;
+		// set next check
+		if (nextExpire != Infinity) 
+			_ttl_timeout = setTimeout(_handleTTL, nextExpire - curtime);
+	}
 
-        // Set TTL value for the key
-        if(ttl !== 0){
-            // If key exists, set TTL
-            if(_storage.hasOwnProperty(key)){
+	function _setTTL(key, ttl) {
+		var curtime = +new Date(), i, len, added = false;
 
-                if(!_storage.__simpleStorage_meta){
-                    _storage.__simpleStorage_meta = {};
-                }
+		ttl = Number(ttl) || 0;
 
-                if(!_storage.__simpleStorage_meta.TTL){
-                    _storage.__simpleStorage_meta.TTL = {expire: {}, keys:[]};
-                }
+		// Set TTL value for the key
+		if (ttl !== 0) {
+			// If key exists, set TTL
+			if (_storage.hasOwnProperty(key)) {
 
-                _storage.__simpleStorage_meta.TTL.expire[key] = curtime + ttl;
+				_storage_meta.TTL.expire[key] = (curtime + ttl);
 
-                // find the expiring key in the array and remove it and all before it (because of sort)
-                if(_storage.__simpleStorage_meta.TTL.expire.hasOwnProperty(key)){
-                    for(i = 0, len = _storage.__simpleStorage_meta.TTL.keys.length; i<len; i++){
-                        if(_storage.__simpleStorage_meta.TTL.keys[i] == key){
-                            _storage.__simpleStorage_meta.TTL.keys.splice(i);
-                        }
-                    }
-                }
+				// remove from expireOrder array
+				if (_storage_meta.TTL.expire.hasOwnProperty(key)) {
+					for (i = 0; i < _storage_meta.TTL.expireOrder.length; i++) {
+						if (_storage_meta.TTL.expireOrder[i] == key) {
+							_storage_meta.TTL.expireOrder.splice(i, 1);
+							break;
+						}
+					}
+				}
 
-				// add key to keys array preserving sort (soonest first)
-				for (i = 0, len = _storage.__simpleStorage_meta.TTL.keys.length; i < len; i++) {
-					if (_storage.__simpleStorage_meta.TTL.expire[_storage.__simpleStorage_meta.TTL.keys[i]] > (curtime + ttl)) {
-						_storage.__simpleStorage_meta.TTL.keys.splice(i, 0, key);
+				// add to expireOrder array, preserving ttl (asc) sort
+				for (i = 0; i < _storage_meta.TTL.expireOrder.length; i++) {
+					if (_storage_meta.TTL.expire[_storage_meta.TTL.expireOrder[i]] >= (curtime + ttl)) {
+						_storage_meta.TTL.expireOrder.splice(i, 0, key);
 						added = true;
 						break;
 					}
 				}
 
-				// if not added in previous loop, add here
-                if(!added){
-                    _storage.__simpleStorage_meta.TTL.keys.push(key);
-                }
-            }else{
-                return false;
+				if (!added) {
+					_storage_meta.TTL.expireOrder.push(key);
+					console.log('new key pushed', key, _storage_meta.TTL.expireOrder)
+				}
+			} else {
+				return false;
+			}
+		} else {
+			// Remove TTL if set
+			if (_storage && _storage_meta && _storage_meta.TTL) {
+
+				if (_storage_meta.TTL.expire.hasOwnProperty(key)) {
+					delete _storage_meta.TTL.expire[key];
+					for (i = 0, len = _storage_meta.TTL.expireOrder.length; i < len; i++) {
+						if (_storage_meta.TTL.expireOrder[i] == key) {
+							_storage_meta.TTL.expireOrder.splice(i, 1);
+							break;
+						}
+					}
+				}
+			}
+		}
+
+		// schedule next TTL check
+		clearTimeout(_ttl_timeout);
+		if (_storage && _storage_meta && _storage_meta.TTL && _storage_meta.TTL.expireOrder.length) {
+			_ttl_timeout = setTimeout(_handleTTL, Math.max(_storage_meta.TTL.expire[_storage_meta.TTL.expireOrder[0]] - curtime, 0));
+		}
+
+		return true;
+	}
+
+	function _dispatchEvent(eventName, item) {
+		var event = new CustomEvent(
+            eventName,
+            {
+            	detail: item,
+            	bubbles: true,
+            	cancelable: true
             }
-        }else{
-            // Remove TTL if set
-            if(_storage && _storage.__simpleStorage_meta && _storage.__simpleStorage_meta.TTL){
+        );
+		document.dispatchEvent(event);
+	}
 
-                if(_storage.__simpleStorage_meta.TTL.expire.hasOwnProperty(key)){
-                    delete _storage.__simpleStorage_meta.TTL.expire[key];
-                    for(i = 0, len = _storage.__simpleStorage_meta.TTL.keys.length; i<len; i++){
-                        if(_storage.__simpleStorage_meta.TTL.keys[i] == key){
-                            _storage.__simpleStorage_meta.TTL.keys.splice(i, 1);
-                            break;
-                        }
-                    }
-                }
+	////////////////////////// PUBLIC INTERFACE /////////////////////////
 
-                _cleanMetaObject();
-            }
-        }
+	try {
+		_init();
+	} catch (E) { }
 
-        // schedule next TTL check
-        clearTimeout(_ttl_timeout);
-        if(_storage && _storage.__simpleStorage_meta && _storage.__simpleStorage_meta.TTL && _storage.__simpleStorage_meta.TTL.keys.length){
-            _ttl_timeout = setTimeout(_handleTTL, Math.min(Math.max(_storage.__simpleStorage_meta.TTL.expire[_storage.__simpleStorage_meta.TTL.keys[0]] - curtime, 0), 0x7FFFFFFF));
-        }
+	return {
 
-        return true;
-    }
+		version: VERSION,
 
-    function _cleanMetaObject(){
-        var updated = false, hasProperties = false, i;
+		canUse: function () {
+			return !!_storage_available;
+		},
 
-        if(!_storage || !_storage.__simpleStorage_meta){
-            return updated;
-        }
+		set: function (key, value, options) {
+			if (!_storage) {
+				return false;
+			}
 
-        // If nothing to TTL, remove the object
-        if(_storage.__simpleStorage_meta.TTL && !_storage.__simpleStorage_meta.TTL.keys.length){
-            delete _storage.__simpleStorage_meta.TTL;
-            updated = true;
-        }
+			// undefined values are deleted automatically
+			if (typeof value == "undefined") {
+				return this.deleteKey(key);
+			}
 
-        // If meta object is empty, remove it
-        for(i in _storage.__simpleStorage_meta){
-            if(_storage.__simpleStorage_meta.hasOwnProperty(i)){
-                hasProperties = true;
-                break;
-            }
-        }
+			options = options || {};
 
-        if(!hasProperties){
-            delete _storage.__simpleStorage_meta;
-            updated = true;
-        }
+			// Check if the value is JSON compatible (and remove reference to existing objects/arrays)
+			try {
+				value = JSON.parse(JSON.stringify(value));
+			} catch (E) {
+				return E;
+			}
 
-        return updated;
-    }
+			_storage[key] = value;
 
-    ////////////////////////// PUBLIC INTERFACE /////////////////////////
+			_setTTL(key, options.TTL || 0);
 
-    try{
-        _init();
-    }catch(E){}
+			return _save();
+		},
 
-    return {
+		get: function (key) {
+			if (!_storage) {
+				return false;
+			}
 
-        version: VERSION,
+			if (_storage.hasOwnProperty(key)) {
+				// TTL value for an existing key should be either a positive number or an Infinity
+				// so skip checking TTL for key
+				if (this.getTTL(key)) {
+					return _storage[key];
+				}
+			}
+		},
 
-        canUse: function(){
-            return !!_storage_available;
-        },
+		deleteKey: function (key) {
 
-        set: function(key, value, options){
-            if(key == "__simpleStorage_meta"){
-                return false;
-            }
+			if (!_storage) {
+				return false;
+			}
 
-            if(!_storage){
-                return false;
-            }
+			if (key in _storage) {
+				delete _storage[key];
 
-            // undefined values are deleted automatically
-            if(typeof value == "undefined"){
-                return this.deleteKey(key);
-            }
+				_setTTL(key, 0);
 
-            options = options || {};
+				return _save();
+			}
 
-            // Check if the value is JSON compatible (and remove reference to existing objects/arrays)
-            try{
-                value = JSON.parse(JSON.stringify(value));
-            }catch(E){
-                return E;
-            }
+			return false;
+		},
 
-            _storage[key] = value;
+		setTTL: function (key, ttl) {
+			if (!_storage) {
+				return false;
+			}
 
-            _setTTL(key, options.TTL || 0);
+			_setTTL(key, ttl);
 
-            return _save();
-        },
+			return _save();
+		},
 
-        get: function(key){
-            if(!_storage){
-                return false;
-            }
+		getTTL: function (key) {
+			var ttl;
 
-            if(_storage.hasOwnProperty(key) && key != "__simpleStorage_meta"){
-                // TTL value for an existing key is either a positive number or an Infinity
-                if(this.getTTL(key)){
-                    return _storage[key];
-                }
-            }
-        },
+			if (!_storage) {
+				return false;
+			}
 
-        deleteKey: function(key){
+			if (_storage.hasOwnProperty(key)) {
+				if (_storage_meta &&
+                    _storage_meta.TTL &&
+                    _storage_meta.TTL.expire &&
+                    _storage_meta.TTL.expire.hasOwnProperty(key)) {
 
-            if(!_storage){
-                return false;
-            }
+					ttl = Math.max(_storage_meta.TTL.expire[key] - (+new Date()) || 0, 0);
 
-            if(key in _storage){
-                delete _storage[key];
+					return ttl || false;
+				} else {
+					return Infinity;
+				}
+			}
 
-                _setTTL(key, 0);
+			return false;
+		},
 
-                return _save();
-            }
+		flush: function () {
+			clearTimeout(_ttl_timeout);
 
-            return false;
-        },
+			if (!_storage) return false;
 
-        setTTL: function(key, ttl){
-            if(!_storage){
-                return false;
-            }
+			_storage = {};
+			_storage_meta = {};
+			try {
+				sessionStorage.removeItem("simpleStorage");
+				sessionStorage.removeItem("simpleStorageMeta");
+				return true;
+			} catch (E) {
+				return E;
+			}
+		},
 
-            _setTTL(key, ttl);
+		index: function () {
+			if (!_storage) {
+				return false;
+			}
 
-            return _save();
-        },
+			var index = [], i;
+			for (i in _storage) {
+				if (_storage.hasOwnProperty(i) && i != "__simpleStorage_meta") {
+					index.push(i);
+				}
+			}
+			return index;
+		},
 
-        getTTL: function(key){
-            var ttl;
-
-            if(!_storage){
-                return false;
-            }
-
-            if(_storage.hasOwnProperty(key)){
-                if(_storage.__simpleStorage_meta &&
-                    _storage.__simpleStorage_meta.TTL &&
-                    _storage.__simpleStorage_meta.TTL.expire &&
-                    _storage.__simpleStorage_meta.TTL.expire.hasOwnProperty(key)){
-
-                    ttl = Math.max(_storage.__simpleStorage_meta.TTL.expire[key] - (+new Date()) || 0, 0);
-
-                    return ttl || false;
-                }else{
-                    return Infinity;
-                }
-            }
-
-            return false;
-        },
-
-        flush: function(){
-            if(!_storage){
-                return false;
-            }
-
-            _storage = {};
-            try{
-                localStorage.removeItem("simpleStorage");
-                return true;
-            }catch(E){
-                return E;
-            }
-        },
-
-        index: function(){
-            if(!_storage){
-                return false;
-            }
-
-            var index = [], i;
-            for(i in _storage){
-                if(_storage.hasOwnProperty(i) && i != "__simpleStorage_meta"){
-                    index.push(i);
-                }
-            }
-            return index;
-        },
-
-        storageSize: function(){
-            return _storage_size;
-        }
-    };
+		storageSize: function () {
+			return _storage_size;
+		}
+	};
 
 }));

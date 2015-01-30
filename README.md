@@ -154,6 +154,22 @@ simpleStorage.canUse()
 
 Returns true if storage is available
 
+## Events
+
+### simpleStorageItemRemoved
+
+Triggered when an item is removed due to TTL timeout
+
+```javascript
+	$(document).on('simpleStorageItemRemoved', function(event) {
+		console.log('key ' + event.originalEvent.detail.key + ' was removed');
+	})
+```
+
+Where
+
+  * **event.originalEvent.detail.key** - the key for the value removed
+
 ## Demo
 
 See demo [here](http://tahvel.info/simpleStorage/example/).
