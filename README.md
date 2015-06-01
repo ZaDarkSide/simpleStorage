@@ -40,7 +40,12 @@ Where
 
   * **key** - the key for the value
   * **value** - value to be stored (can be any JSONeable value)
-  * **options** - optional options object. Currently only available option is `options.TTL` which can be used to set the TTL value to the key `simpleStorage.set(key, value, {TTL: 1000})`
+  * **options** - optional options object. Currently the only available option is `TTL` which sets the time-to-live (TTL) value in milliseconds for the given key/value
+
+```javascript
+// the following entry expires in 100 seconds
+simpleStorage.set(key, value, {TTL: 100000})
+```
 
 Return values
 
