@@ -1,0 +1,13 @@
+{
+    "indent": 4,
+    "browser": true,
+    "globalstrict": true,
+    "evil": true,
+    "unused": true,
+    "undef": true,
+    "newcap": true,
+    "esnext": true,
+    "curly": true,
+    "eqeqeq": true,
+    "expr": true
+}

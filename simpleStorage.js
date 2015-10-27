@@ -1,5 +1,5 @@
 /* jshint browser: true */
-/* global define: false */
+/* global define: false, module: false */
 
 // AMD shim
 (function(root, factory) {
@@ -19,7 +19,7 @@
     'use strict';
 
     var
-        VERSION = '0.1.3',
+        VERSION = '0.1.4',
 
         /* This is the object, that holds the cached values */
         _storage = false,
@@ -140,7 +140,7 @@
         }
 
         // set next check
-        if (nextExpire != Infinity) {
+        if (nextExpire !== Infinity) {
             _ttl_timeout = setTimeout(_handleTTL, Math.min(nextExpire - curtime, 0x7FFFFFFF));
         }
 
@@ -180,7 +180,7 @@
                 // find the expiring key in the array and remove it and all before it (because of sort)
                 if (_storage.__simpleStorage_meta.TTL.expire.hasOwnProperty(key)) {
                     for (i = 0, len = _storage.__simpleStorage_meta.TTL.keys.length; i < len; i++) {
-                        if (_storage.__simpleStorage_meta.TTL.keys[i] == key) {
+                        if (_storage.__simpleStorage_meta.TTL.keys[i] === key) {
                             _storage.__simpleStorage_meta.TTL.keys.splice(i);
                         }
                     }
@@ -209,7 +209,7 @@
                 if (_storage.__simpleStorage_meta.TTL.expire.hasOwnProperty(key)) {
                     delete _storage.__simpleStorage_meta.TTL.expire[key];
                     for (i = 0, len = _storage.__simpleStorage_meta.TTL.keys.length; i < len; i++) {
-                        if (_storage.__simpleStorage_meta.TTL.keys[i] == key) {
+                        if (_storage.__simpleStorage_meta.TTL.keys[i] === key) {
                             _storage.__simpleStorage_meta.TTL.keys.splice(i, 1);
                             break;
                         }
@@ -275,7 +275,7 @@
         },
 
         set: function(key, value, options) {
-            if (key == '__simpleStorage_meta') {
+            if (key === '__simpleStorage_meta') {
                 return false;
             }
 
@@ -284,7 +284,7 @@
             }
 
             // undefined values are deleted automatically
-            if (typeof value == 'undefined') {
+            if (typeof value === 'undefined') {
                 return this.deleteKey(key);
             }
 
@@ -309,7 +309,7 @@
                 return false;
             }
 
-            if (_storage.hasOwnProperty(key) && key != '__simpleStorage_meta') {
+            if (_storage.hasOwnProperty(key) && key !== '__simpleStorage_meta') {
                 // TTL value for an existing key is either a positive number or an Infinity
                 if (this.getTTL(key)) {
                     return _storage[key];
@@ -390,7 +390,7 @@
             var index = [],
                 i;
             for (i in _storage) {
-                if (_storage.hasOwnProperty(i) && i != '__simpleStorage_meta') {
+                if (_storage.hasOwnProperty(i) && i !== '__simpleStorage_meta') {
                     index.push(i);
                 }
             }

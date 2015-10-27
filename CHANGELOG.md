@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.1.4 2015-10-27
+
+  * Added Gruntfile to auto generate simpleStorage.min.js
+  * Added jshint rule file and Grunt task
+
 ## v0.1.3 2015-01-15
 
   * Bumped version to 0.1.3
