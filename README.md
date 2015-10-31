@@ -38,6 +38,13 @@ If you want to support with Bitcoins, then my wallet address is `15Z8ADxhssKUiwP
 
 *simpleStorage* API is a subset of jStorage with slight modifications, so for most cases it should work out of the box if you are converting from jStorage. Main difference is between return values - if an action failed because of an error (storage full, storage not available, invalid data used etc.), you get the error object as the return value. jStorage never indicated anything if an error occurred.
 
+Possible error codes (from `err.code`):
+
+  * **"LS_NOT_AVAILABLE"** means that localStorage is not supported by this browser
+  * **"LS_DISABLE"** means that localStorage is supported by this browser but it can't be used for whatever reason (privacy mode, manual disabling etc.)
+  * **"LS_QUOTA_EXCEEDED"** means that the allocated quota for localStorage is all used up or would be if current value is stored
+  * *anything else*, no idea
+
 ### set(key, value[, options])
 
 Store or update a value in local storage.
@@ -61,7 +68,7 @@ Return values
 
   * **true** - value was stored
   * **false** - value was not stored
-  * Error object - value was not stored because of an error
+  * Error object - value was not stored because of an error. See `error.code` for explanation
 
 ### get(key)
 
@@ -89,7 +96,7 @@ Return values
 
   * **true** - value was deleted
   * **false** - value was not found
-  * Error object - value was not deleted because of an error
+  * Error object - value was not deleted because of an error. See `error.code` for explanation
 
 ### setTTL(key, ttl)
 
@@ -108,7 +115,7 @@ Return values
 
   * **true** - ttl was set
   * **false** - value was not found
-  * Error object - ttl was not set because of an error
+  * Error object - ttl was not set because of an error. See `error.code` for explanation
 
 ### getTTL(key)
 
@@ -139,7 +146,7 @@ simpleStorage.flush()
 Return values
 
   * **true** - storage was flushed
-  * Error object - storage was not flushed because of an error
+  * Error object - storage was not flushed because of an error. See `error.code` for explanation
 
 ### index()
 

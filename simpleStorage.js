@@ -18,30 +18,31 @@
 
     'use strict';
 
-    var
-        VERSION = '0.1.4',
+    var VERSION = '0.1.4';
 
-        /* This is the object, that holds the cached values */
-        _storage = false,
+    /* This is the object, that holds the cached values */
+    var _storage = false;
 
-        /* How much space does the storage take */
-        _storage_size = 0,
+    /* How much space does the storage take */
+    var _storage_size = 0;
 
-        _storage_available = false,
+    var _storage_available = false;
+    var _ttl_timeout = null;
 
-        _ttl_timeout = null;
+    var _lsStatus = 'OK';
+    var LS_NOT_AVAILABLE = 'LS_NOT_AVAILABLE';
+    var LS_DISABLED = 'LS_DISABLED';
+    var LS_QUOTA_EXCEEDED = 'LS_QUOTA_EXCEEDED';
 
     // This method might throw as it touches localStorage and doing so
     // can be prohibited in some environments
     function _init() {
 
-        // If localStorage does not exist, the following throws
-        // This is intentional
-        window.localStorage.setItem('__simpleStorageInitTest', 'tmpval');
-        window.localStorage.removeItem('__simpleStorageInitTest');
+        // this method throws if localStorage is not usable, otherwise returns true
+        _storage_available = _checkAvailability();
 
         // Load data from storage
-        _load_storage();
+        _loadStorage();
 
         // remove dead keys
         _handleTTL();
@@ -77,7 +78,7 @@
      */
     function _reloadData() {
         try {
-            _load_storage();
+            _loadStorage();
         } catch (E) {
             _storage_available = false;
             return;
@@ -85,7 +86,7 @@
         _handleTTL();
     }
 
-    function _load_storage() {
+    function _loadStorage() {
         var source = localStorage.getItem('simpleStorage');
 
         try {
@@ -102,7 +103,7 @@
             localStorage.setItem('simpleStorage', JSON.stringify(_storage));
             _storage_size = _get_storage_size();
         } catch (E) {
-            return E;
+            return _formatError(E);
         }
         return true;
     }
@@ -260,18 +261,122 @@
         return updated;
     }
 
+    /**
+     * Checks if localStorage is available or throws an error
+     */
+    function _checkAvailability() {
+        var err;
+        var items = 0;
+
+        // Firefox sets localStorage to 'null' if support is disabled
+        // IE might go crazy if quota is exceeded and start treating it as 'unknown'
+        if (window.localStorage === null || typeof window.localStorage === 'unknown') {
+            err = new Error('localStorage is disabled');
+            err.code = LS_DISABLED;
+            throw err;
+        }
+
+        // There doesn't seem to be any indication about localStorage support
+        if (!window.localStorage) {
+            err = new Error('localStorage not supported');
+            err.code = LS_NOT_AVAILABLE;
+            throw err;
+        }
+
+        try {
+            items = window.localStorage.length;
+        } catch (E) {
+            throw _formatError(E);
+        }
+
+        try {
+            // we try to set a value to see if localStorage is really usable or not
+            window.localStorage.setItem('__simpleStorageInitTest', Date.now().toString(16));
+            window.localStorage.removeItem('__simpleStorageInitTest');
+        } catch (E) {
+            if (items) {
+                // there is already some data stored, so this might mean that storage is full
+                throw _formatError(E);
+            } else {
+                // we do not have any data stored and we can't add anything new
+                // so we are most probably in Private Browsing mode where
+                // localStorage is turned off in some browsers (max storage size is 0)
+                err = new Error('localStorage is disabled');
+                err.code = LS_DISABLED;
+                throw err;
+            }
+        }
+
+        return true;
+    }
+
+    function _formatError(E) {
+        var err;
+
+        // No more storage:
+        // Mozilla: NS_ERROR_DOM_QUOTA_REACHED, code 1014
+        // WebKit: QuotaExceededError/QUOTA_EXCEEDED_ERR, code 22
+        // IE number -2146828281: Out of memory
+        // IE number -2147024882: Not enough storage is available to complete this operation
+        if (E.code === 22 || E.code === 1014 || [-2147024882, -2146828281, -21474675259].indexOf(E.number) > 0) {
+            err = new Error('localStorage quota exceeded');
+            err.code = LS_QUOTA_EXCEEDED;
+            return err;
+        }
+
+        // SecurityError, localStorage is turned off
+        if (E.code === 18 || E.code === 1000) {
+            err = new Error('localStorage is disabled');
+            err.code = LS_DISABLED;
+            return err;
+        }
+
+        // We are trying to access something from an object that is either null or undefined
+        if (E.name === 'TypeError') {
+            err = new Error('localStorage is disabled');
+            err.code = LS_DISABLED;
+            return err;
+        }
+
+        return E;
+    }
+
+    // Sets value for _lsStatus
+    function _checkError(err) {
+        if (!err) {
+            _lsStatus = 'OK';
+            return err;
+        }
+
+        switch (err.code) {
+            case LS_NOT_AVAILABLE:
+            case LS_DISABLED:
+            case LS_QUOTA_EXCEEDED:
+                _lsStatus = err.code;
+                break;
+            default:
+                _lsStatus = err.code || err.number || err.message || err.name;
+        }
+
+        return err;
+    }
+
     ////////////////////////// PUBLIC INTERFACE /////////////////////////
 
     try {
         _init();
-    } catch (E) {}
+    } catch (E) {
+        _checkError(E);
+    }
 
     return {
 
         version: VERSION,
 
+        status: _lsStatus,
+
         canUse: function() {
-            return !!_storage_available;
+            return _lsStatus === 'OK' && !!_storage_available;
         },
 
         set: function(key, value, options) {
@@ -294,7 +399,7 @@
             try {
                 value = JSON.parse(JSON.stringify(value));
             } catch (E) {
-                return E;
+                return _formatError(E);
             }
 
             _storage[key] = value;
@@ -378,7 +483,7 @@
                 localStorage.removeItem('simpleStorage');
                 return true;
             } catch (E) {
-                return E;
+                return _formatError(E);
             }
         },
 
