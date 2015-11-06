@@ -18,7 +18,7 @@
 
     'use strict';
 
-    var VERSION = '0.1.4';
+    var VERSION = '0.2.0';
 
     /* This is the object, that holds the cached values */
     var _storage = false;

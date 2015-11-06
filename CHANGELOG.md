@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.2.0 2015-11-06
+
+  * Unified error handling for over quota, disabled local storage etc.
+
 ## v0.1.4 2015-10-27
 
   * Added Gruntfile to auto generate simpleStorage.min.js

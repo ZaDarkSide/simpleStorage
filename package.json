@@ -1,6 +1,6 @@
 {
   "name": "simplestorage.js",
-  "version": "0.1.4",
+  "version": "0.2.0",
   "description": "Cross-browser key-value store database to store data locally in the browser",
   "author": "Andris Reinman <andris@kreata.ee>",
   "repository": {
