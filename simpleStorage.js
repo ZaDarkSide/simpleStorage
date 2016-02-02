@@ -409,6 +409,18 @@
             return _save();
         },
 
+        hasKey: function(key) {
+            if (!_storage) {
+                return false;
+            }
+
+            if (_storage.hasOwnProperty(key) && key !== '__simpleStorage_meta') {
+                return true;
+            }
+
+            return false;
+        },
+
         get: function(key) {
             if (!_storage) {
                 return false;
