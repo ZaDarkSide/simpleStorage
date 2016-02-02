@@ -84,6 +84,20 @@ Where
 
 Method returns the value for a key or undefined if the key was not found.
 
+### hasKey(key)
+
+Checks if there's a value with the given key in the local storage.
+
+```javascript
+simpleStorage.hasKey(key)
+```
+
+Where
+
+  * **key** - the key to be checked
+
+Method returns true if the given key exists, false otherwise.
+
 ### deleteKey(key)
 
 Removes a value from local storage.
