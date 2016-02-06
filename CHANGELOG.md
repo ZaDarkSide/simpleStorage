@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.2.1 2016-02-06
+
+  * Added new method `hasKey(key)`
+
 ## v0.2.0 2015-11-06
 
   * Unified error handling for over quota, disabled local storage etc.

@@ -1,6 +1,6 @@
 {
   "name": "simplestorage.js",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Cross-browser key-value store database to store data locally in the browser",
   "author": "Andris Reinman <andris@kreata.ee>",
   "repository": {
@@ -20,7 +20,7 @@
   "main": "simpleStorage.min.js",
   "devDependencies": {
     "grunt": "^0.4.5",
-    "grunt-contrib-jshint": "^0.11.3",
-    "grunt-contrib-uglify": "^0.9.2"
+    "grunt-contrib-jshint": "^0.12.0",
+    "grunt-contrib-uglify": "^0.11.1"
   }
 }

@@ -1,7 +1,7 @@
 {
     "indent": 4,
     "browser": true,
-    "globalstrict": true,
+    "globalstrict": false,
     "evil": true,
     "unused": true,
     "undef": true,

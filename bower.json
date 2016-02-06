@@ -1,7 +1,7 @@
 {
   "name": "simpleStorage",
   "main": "simpleStorage.min.js",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "homepage": "https://github.com/andris9/simpleStorage",
   "authors": [
     "Andris Reinman <andris@kreata.ee>"
