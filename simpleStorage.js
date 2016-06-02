@@ -291,7 +291,7 @@
 
         try {
             // we try to set a value to see if localStorage is really usable or not
-            window.localStorage.setItem('__simpleStorageInitTest', Date.now().toString(16));
+            window.localStorage.setItem('__simpleStorageInitTest', (+new Date).toString(16));
             window.localStorage.removeItem('__simpleStorageInitTest');
         } catch (E) {
             if (items) {
