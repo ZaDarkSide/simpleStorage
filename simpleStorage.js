@@ -11,10 +11,13 @@
     } else if (typeof exports !== 'undefined') {
         module.exports = factory();
     } else {
-        root.simpleStorage = factory();
+        // root.simpleStorage = factory();
+        root.simpleStorage = function(key) {
+            return root.simpleStorage[key] || (root.simpleStorage[key] = factory(key));
+        };
     }
 
-}(this, function() {
+}(this, function(___key) {
 
     'use strict';
 
@@ -87,7 +90,7 @@
     }
 
     function _loadStorage() {
-        var source = localStorage.getItem('simpleStorage');
+        var source = localStorage.getItem(___key);
 
         try {
             _storage = JSON.parse(source) || {};
@@ -100,7 +103,7 @@
 
     function _save() {
         try {
-            localStorage.setItem('simpleStorage', JSON.stringify(_storage));
+            localStorage.setItem(___key, JSON.stringify(_storage));
             _storage_size = _get_storage_size();
         } catch (E) {
             return _formatError(E);
@@ -109,7 +112,7 @@
     }
 
     function _get_storage_size() {
-        var source = localStorage.getItem('simpleStorage');
+        var source = localStorage.getItem(___key);
         return source ? String(source).length : 0;
     }
 
@@ -484,7 +487,7 @@
 
             _storage = {};
             try {
-                localStorage.removeItem('simpleStorage');
+                localStorage.removeItem(___key);
                 return true;
             } catch (E) {
                 return _formatError(E);
