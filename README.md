@@ -19,7 +19,7 @@ The module has no dependencies, you can use it as a standalone script (introduce
 Quickest way to get up and running woulr be to use [jsDelivr CDN](http://www.jsdelivr.com/projects/simplestorage):
 
 ```html
-<script src="https://cdn.jsdelivr.net/simplestorage/0.2.1/simpleStorage.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/simplestorage.js@0.2.1/simpleStorage.min.js"></script>
 ```
 
 Otherwise you can download [simpleStorage.js](https://github.com/andris9/simpleStorage/blob/master/simpleStorage.js) or install it with bower:
