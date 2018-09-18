@@ -12,7 +12,7 @@ The module has no dependencies, you can use it as a standalone script (introduce
 
 *simpleStorage* is **very** small - about **1kB** in size when minimized and gzipped.
 
-[![Build Status](https://travis-ci.org/andris9/simpleStorage.png?branch=master)](https://travis-ci.org/andris9/simpleStorage)
+[![Build Status](https://travis-ci.org/ZaDarkSide/simpleStorage.png?branch=master)](https://travis-ci.org/ZaDarkSide/simpleStorage)
 
 ## Install
 
@@ -22,7 +22,7 @@ Quickest way to get up and running woulr be to use [jsDelivr CDN](http://www.jsd
 <script src="https://cdn.jsdelivr.net/npm/simplestorage.js@0.2.1/simpleStorage.min.js"></script>
 ```
 
-Otherwise you can download [simpleStorage.js](https://github.com/andris9/simpleStorage/blob/master/simpleStorage.js) or install it with bower:
+Otherwise you can download [simpleStorage.js](https://github.com/ZaDarkSide/simpleStorage/blob/master/simpleStorage.js) or install it with bower:
 
     bower install simpleStorage
 
