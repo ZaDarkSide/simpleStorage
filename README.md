@@ -190,6 +190,15 @@ simpleStorage.canUse()
 
 Returns true if storage is available
 
+
+## getAllKeyValues()
+
+```javascript
+simpleStorage.getAllKeyValues()
+```
+
+Returns the **_storageObject** or **false** if error occurs
+
 ## Demo
 
 See demo [here](http://tahvel.info/simpleStorage/example/).
