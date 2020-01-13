@@ -291,7 +291,7 @@
 
         try {
             // we try to set a value to see if localStorage is really usable or not
-            window.localStorage.setItem('__simpleStorageInitTest', (+new Date).toString(16));
+            window.localStorage.setItem('__simpleStorageInitTest', (+new Date()).toString(16));
             window.localStorage.removeItem('__simpleStorageInitTest');
         } catch (E) {
             if (items) {
@@ -423,6 +423,8 @@
                 if (this.getTTL(key)) {
                     return _storage[key];
                 }
+
+                return _storage[key];
             }
         },
 
@@ -508,7 +510,26 @@
 
         storageSize: function() {
             return _storage_size;
-        }
+        },
+
+        getAllKeyValues : function(){
+
+            if(!_storage){
+                return false;
+            }
+
+            if(_storage && typeof _storage === 'string'){
+
+                try{
+                    _storage = JSON.parse(_storage);
+                }
+                catch(err){
+                    return false;
+                }
+            }
+            
+            return _storage;
+        } 
     };
 
 }));
